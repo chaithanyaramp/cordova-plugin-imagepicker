@@ -59,8 +59,7 @@ public class ImagePicker extends CordovaPlugin {
     private static final int OPEN_REQUEST_CODE = 41;
     private static final int SAVE_REQUEST_CODE = 42;
     private String TAG = "IMAGEPICKER";
-    public Boolean multiple = true;
-    private Map < String, Integer > fileNames = new HashMap < String, Integer > ();
+    private Map<String, Integer> fileNames = new HashMap<String, Integer>();
     private Cursor imagecursor, actualimagecursor;
     private int maxImages = 20;
     private int maxImageCount = 20;
@@ -84,18 +83,17 @@ public class ImagePicker extends CordovaPlugin {
             return true;
 
         } else if (ACTION_GET_PICTURES.equals(action)) {
-            //            progress.setTitle(cordova.getActivity().getApplicationContext().getString(fakeR.getId("string", "multi_image_picker_processing_images_title")));
-            //            progress.setMessage(cordova.getActivity().getApplicationContext().getString(fakeR.getId("string", "multi_image_picker_processing_images_message")));
+//            progress.setTitle(cordova.getActivity().getApplicationContext().getString(fakeR.getId("string", "multi_image_picker_processing_images_title")));
+//            progress.setMessage(cordova.getActivity().getApplicationContext().getString(fakeR.getId("string", "multi_image_picker_processing_images_message")));
 
             final JSONObject params = args.getJSONObject(0);
-            //            final Intent imagePickerIntent = new Intent(cordova.getActivity(), MultiImageChooserActivity.class);
+//            final Intent imagePickerIntent = new Intent(cordova.getActivity(), MultiImageChooserActivity.class);
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("image/*");
-            if (this.multiple) {
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            }
-            //            startActivityForResult(intent, OPEN_REQUEST_CODE);
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+
+//            startActivityForResult(intent, OPEN_REQUEST_CODE);
 
             int max = 20;
             int desiredWidth = 0;
@@ -117,11 +115,18 @@ public class ImagePicker extends CordovaPlugin {
             if (params.has("outputType")) {
                 outputType = params.getInt("outputType");
             }
+
             this.desiredWidth = desiredWidth;
             this.desiredHeight = desiredHeight;
             this.maxImageCount = max;
             this.outputType = OutputType.fromValue(outputType);
             this.quality = quality;
+//            if(this.maxImageCount > 1){
+//                this.multiple = true;
+//            }else{
+//                this.multiple = false;
+//            }
+
 
             // .. until then use:
             if (hasReadPermission()) {
@@ -140,18 +145,16 @@ public class ImagePicker extends CordovaPlugin {
     @SuppressLint("InlinedApi")
     private boolean hasReadPermission() {
         return Build.VERSION.SDK_INT < 23 ||
-            PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this.cordova.getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
+                PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this.cordova.getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
     }
 
     @SuppressLint("InlinedApi")
     private void requestReadPermission() {
         if (!hasReadPermission()) {
             ActivityCompat.requestPermissions(
-                this.cordova.getActivity(),
-                new String[] {
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                },
-                PERMISSION_REQUEST_CODE);
+                    this.cordova.getActivity(),
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    PERMISSION_REQUEST_CODE);
         }
         // This method executes async and we seem to have no known way to receive the result
         // (that's why these methods were later added to Cordova), so simply returning ok now.
@@ -163,7 +166,7 @@ public class ImagePicker extends CordovaPlugin {
      * Added By ARIHANT FROM HERE ONWARDS
      */
     public void onActivityResult(int requestCode, int resultCode,
-        Intent resultData) {
+                                 Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == CREATE_REQUEST_CODE) {
@@ -174,45 +177,43 @@ public class ImagePicker extends CordovaPlugin {
 
                 if (resultData != null) {
                     Uri currentUri =
-                        resultData.getData();
-                    //                    writeFileContent(currentUri);
+                            resultData.getData();
+//                    writeFileContent(currentUri);
                     Log.d(TAG, "Content URI: " + currentUri.toString());
                 }
             } else if (requestCode == OPEN_REQUEST_CODE) {
 
                 if (resultData != null) {
-                    if (this.multiple) {
                         final ClipData clipData = resultData.getClipData();
                         int takeFlags = resultData.getFlags();
                         takeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                        ArrayList < Uri > uris = new ArrayList < Uri > ();
-                        for (int i = 0; i < clipData.getItemCount(); i++) {
-                            ClipData.Item item = clipData.getItemAt(i);
-                            Uri dataUri = item.getUri();
+                        ArrayList<Uri> uris = new ArrayList<Uri>();
+                        if(clipData != null){
+                            for (int i = 0; i < clipData.getItemCount(); i++) {
+                                ClipData.Item item = clipData.getItemAt(i);
+                                Uri dataUri = item.getUri();
+                                if (dataUri != null) {
+                                    uris.add(dataUri);
+                                    Log.d(TAG, "File URI : " + dataUri.toString());
+                                }
+                            }
+                        }else{
+                            Uri dataUri = resultData.getData();
                             if (dataUri != null) {
                                 uris.add(dataUri);
-                                Log.d(TAG, "File URI : " + dataUri.toString());
                             }
                         }
                         processFiles(uris);
-                    } else {
-                        Uri currentUri = resultData.getData();
-                        if (currentUri != null) {
-                            Log.d(TAG, "Open File, Content URI: " + currentUri.toString());
-                        } else {
-                            Log.e(TAG, "ContentUri is NUll");
-                        }
-                    }
                 }
 
 
-                //                    try {
-                //                        String content =
-                //                                readFileContent(currentUri);
-                //                        textView.setText(content);
-                //                    } catch (IOException e) {
-                //                        // Handle error here
-                //                    }
+//                    try {
+//                        String content =
+//                                readFileContent(currentUri);
+//                        textView.setText(content);
+//                    } catch (IOException e) {
+//                        // Handle error here
+//                    }
 
             } else {
                 Log.d(TAG, "Received Code : " + String.valueOf(requestCode));
@@ -221,26 +222,31 @@ public class ImagePicker extends CordovaPlugin {
         }
     }
 
-    private void processFiles(ArrayList < Uri > uris) {
-        //        progress.show();
+    private void processFiles(ArrayList<Uri> uris) {
+//        progress.show();
         if (uris.isEmpty()) {
             sendResultsToCordova(ACTIVITY_RESULT_CANCELED, null);
-            //            progress.dismiss();
-            //            finish();
+//            progress.dismiss();
+        } else if(uris.size() > this.maxImageCount){
+            Intent data = new Intent();
+            Bundle res = new Bundle();
+            res.putString("ERRORMESSAGE", "Cannot select more than " + String.valueOf(this.maxImageCount) + " Images");
+            data.putExtras(res);
+            sendResultsToCordova(ACTIVITY_RESULT_CANCELED, data);
         } else {
             new ResizeImagesTask().execute(uris);
         }
     }
 
-    private class ResizeImagesTask extends AsyncTask < ArrayList < Uri > , Void, ArrayList < String >> {
+    private class ResizeImagesTask extends AsyncTask<ArrayList<Uri>, Void, ArrayList<String>> {
         private Exception asyncTaskError = null;
 
         @Override
-        protected ArrayList < String > doInBackground(ArrayList < Uri > ...fileSets) {
-            ArrayList < String > al = new ArrayList < String > ();
+        protected ArrayList<String> doInBackground(ArrayList<Uri>... fileSets) {
+            ArrayList<String> al = new ArrayList<String>();
             try {
-                ArrayList < Uri > urisCopy = fileSets[0];
-                Iterator < Uri > i = urisCopy.iterator();
+                ArrayList<Uri> urisCopy = fileSets[0];
+                Iterator<Uri> i = urisCopy.iterator();
                 Bitmap bmp;
                 while (i.hasNext()) {
                     Uri fileuri = i.next();
@@ -256,8 +262,8 @@ public class ImagePicker extends CordovaPlugin {
                     float scale = calculateScale(width, height);
 
                     if (scale < 1) {
-                        int finalWidth = (int)(width * scale);
-                        int finalHeight = (int)(height * scale);
+                        int finalWidth = (int) (width * scale);
+                        int finalHeight = (int) (height * scale);
                         int inSampleSize = calculateInSampleSize(options, finalWidth, finalHeight);
                         options = new BitmapFactory.Options();
                         options.inSampleSize = inSampleSize;
@@ -311,14 +317,15 @@ public class ImagePicker extends CordovaPlugin {
                         File file = new File(uri);
                         file.delete();
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
 
-                return new ArrayList < String > ();
+                return new ArrayList<String>();
             }
         }
 
         @Override
-        protected void onPostExecute(ArrayList < String > al) {
+        protected void onPostExecute(ArrayList<String> al) {
             Intent data = new Intent();
 
             if (asyncTaskError != null) {
@@ -344,16 +351,15 @@ public class ImagePicker extends CordovaPlugin {
             }
             Log.d(TAG, "TASK FINISH");
 
-            //            progress.dismiss();
-            //            finish();
+//            progress.dismiss();
+//            finish();
 
         }
 
         private Bitmap tryToGetBitmap(Uri fileuri,
-            BitmapFactory.Options options,
-            int rotate,
-            boolean shouldScale) throws IOException,
-        OutOfMemoryError {
+                                      BitmapFactory.Options options,
+                                      int rotate,
+                                      boolean shouldScale) throws IOException, OutOfMemoryError {
             Bitmap bmp;
             InputStream is = cordova.getActivity().getApplicationContext().getContentResolver().openInputStream(fileuri);
             if (options == null) {
@@ -443,14 +449,14 @@ public class ImagePicker extends CordovaPlugin {
     }
 
     private int calculateNextSampleSize(int sampleSize) {
-        double logBaseTwo = (int)(Math.log(sampleSize) / Math.log(2));
+        double logBaseTwo = (int) (Math.log(sampleSize) / Math.log(2));
         return (int) Math.pow(logBaseTwo + 1, 2);
     }
 
     private float calculateScale(int width, int height) {
-        float widthScale = 1.0 f;
-        float heightScale = 1.0 f;
-        float scale = 1.0 f;
+        float widthScale = 1.0f;
+        float heightScale = 1.0f;
+        float scale = 1.0f;
         if (desiredWidth > 0 || desiredHeight > 0) {
             if (desiredHeight == 0 && desiredWidth < width) {
                 scale = (float) desiredWidth / width;
@@ -489,7 +495,7 @@ public class ImagePicker extends CordovaPlugin {
         }
 
         public static OutputType fromValue(int value) {
-            for (OutputType type: OutputType.values()) {
+            for (OutputType type : OutputType.values()) {
                 if (type.value == value) {
                     return type;
                 }
@@ -503,7 +509,7 @@ public class ImagePicker extends CordovaPlugin {
             int sync = data.getIntExtra("bigdata:synccode", -1);
             final Bundle bigData = ResultIPC.get().getLargeData(sync);
 
-            ArrayList < String > fileNames = bigData.getStringArrayList("MULTIPLEFILENAMES");
+            ArrayList<String> fileNames = bigData.getStringArrayList("MULTIPLEFILENAMES");
 
             JSONArray res = new JSONArray(fileNames);
             callbackContext.success(res);
@@ -521,19 +527,19 @@ public class ImagePicker extends CordovaPlugin {
         }
     }
 
-    /*
-        @Override
-        public void onRequestPermissionResult(int requestCode,
-                                              String[] permissions,
-                                              int[] grantResults) throws JSONException {
+/*
+    @Override
+    public void onRequestPermissionResult(int requestCode,
+                                          String[] permissions,
+                                          int[] grantResults) throws JSONException {
 
-            // For now we just have one permission, so things can be kept simple...
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                cordova.startActivityForResult(this, imagePickerIntent, 0);
-            } else {
-                // Tell the JS layer that something went wrong...
-                callbackContext.error("Permission denied");
-            }
+        // For now we just have one permission, so things can be kept simple...
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            cordova.startActivityForResult(this, imagePickerIntent, 0);
+        } else {
+            // Tell the JS layer that something went wrong...
+            callbackContext.error("Permission denied");
         }
-    */
+    }
+*/
 }
