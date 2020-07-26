@@ -1,4 +1,4 @@
-package com.feturtles.ImagePicker;
+package com.feturtles.imagepicker;
 
 import android.os.Bundle;
 
