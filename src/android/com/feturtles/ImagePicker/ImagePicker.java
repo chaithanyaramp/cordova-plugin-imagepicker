@@ -28,6 +28,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -38,6 +39,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Base64;
@@ -244,6 +247,7 @@ public class ImagePicker extends CordovaPlugin {
         @Override
         protected ArrayList<String> doInBackground(ArrayList<Uri>... fileSets) {
             ArrayList<String> al = new ArrayList<String>();
+            ContentResolver cr = cordova.getActivity().getApplicationContext().getContentResolver();
             try {
                 ArrayList<Uri> urisCopy = fileSets[0];
                 Iterator<Uri> i = urisCopy.iterator();
@@ -301,7 +305,15 @@ public class ImagePicker extends CordovaPlugin {
                     }
 
                     if (outputType == OutputType.FILE_URI) {
-                        file = storeImage(bmp, file.getName(), "");
+
+                        String fileType = cr.getType(fileuri);
+                        String ext = "";
+                        if(fileType.equals("image/png")){
+                          ext = ".png";
+                        }else{
+                          ext = ".jpeg";
+                        }
+                        file = storeImage(bmp, file.getName(), ext);
                         al.add(Uri.fromFile(file).toString());
 
                     } else if (outputType == OutputType.BASE64_STRING) {

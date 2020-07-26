@@ -1,4 +1,4 @@
-package com.synconset;
+package com.feturtles;
 
 import android.os.Bundle;
 

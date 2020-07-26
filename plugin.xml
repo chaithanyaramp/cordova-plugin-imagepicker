@@ -114,8 +114,8 @@
         <source-file src="src/android/com/feturtles/ImagePicker/FakeR.java" target-dir="src/com/feturtles" />
         <source-file src="src/android/com/feturtles/ImagePicker/ResultIPC.java" target-dir="src/com/feturtles" />
 
-        <source-file src="src/android/Library/src/ImageFetcher.java" target-dir="src/com/feturtles"/>
-        <source-file src="src/android/Library/src/MultiImageChooserActivity.java" target-dir="src/com/feturtles"/>
+        <!-- <source-file src="src/android/Library/src/ImageFetcher.java" target-dir="src/com/feturtles"/>
+        <source-file src="src/android/Library/src/MultiImageChooserActivity.java" target-dir="src/com/feturtles"/> -->
 
         <resource-file src="src/android/Library/res/anim/image_pop_in.xml" target="res/anim/image_pop_in.xml"/>
         <resource-file src="src/android/Library/res/drawable/grid_background.xml" target="res/drawable/grid_background.xml"/>
