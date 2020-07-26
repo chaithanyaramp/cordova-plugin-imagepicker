@@ -1,7 +1,7 @@
 /**
  * An Image Picker Plugin for Cordova/PhoneGap.
  */
-package com.feturtles;
+package com.feturtles.ImagePicker;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
